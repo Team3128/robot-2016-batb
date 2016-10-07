@@ -1,19 +1,137 @@
 package org.team3128.mechanisms;
 
 import org.team3128.common.hardware.motor.MotorGroup;
+import org.team3128.common.listener.POVValue;
 
+import edu.wpi.first.wpilibj.command.Command;
+
+/**
+ * Class for the intake arm and its two rollers
+ * @author Jamie
+ *
+ */
 public class Intake
 {
-	MotorGroup wheels;
-	
-	MotorGroup lifter;
-	
-	public Intake(MotorGroup wheels, MotorGroup lifter)
+	public enum RollerState
 	{
-		this.wheels = wheels;
-		this.lifter = lifter;
+		STOPPED(0, 0),
+		INTAKE(.25, 1),
+		OUTTAKE(-.7, -1);
+		
+		public final double innerRollerPower;
+		public final double outerRollerPower;
+		
+		private RollerState(double innerPower, double outerPower)
+		{
+			this.innerRollerPower = innerPower;
+			this.outerRollerPower = outerPower;
+		}
+		
+
 	}
 	
+	private MotorGroup outerRoller;
+	private MotorGroup innerRoller;
 	
+	private MotorGroup intakeLifter;
+	
+	private RollerState rollerState;
 
+	private boolean intakeUp;
+
+	/**
+	 * 
+	 * @param outerRoller The rollers that suck in the ball
+	 * @param innerRoller The roller in the middle of the robot that holds the ball
+	 * @param intakeLifter The motor that lifts and lowers the intake
+	 */
+	public Intake(MotorGroup outerRoller, MotorGroup innerRoller, MotorGroup intakeLifter)
+	{
+		this.outerRoller = outerRoller;
+		this.innerRoller = innerRoller;
+		this.intakeLifter = intakeLifter;
+	}
+	
+	public void onPOVUpdate(POVValue newValue)
+	{
+		switch(newValue.getDirectionValue())
+		{
+		case 0:
+			setRollerState(RollerState.STOPPED);
+			break;
+		case 1:
+		case 2:
+		case 8:
+			setRollerState(RollerState.OUTTAKE);
+			break;
+		case 4:
+		case 5:
+		case 6:
+			setRollerState(RollerState.INTAKE);
+			break;
+		}
+
+		
+	}
+	
+	public RollerState getRollerState()
+	{
+		return rollerState;
+	}
+
+	public void setRollerState(RollerState state)
+	{
+		outerRoller.setTarget(state.outerRollerPower);
+		innerRoller.setTarget(state.innerRollerPower);
+		
+		rollerState = state;
+	}
+	
+	/**
+	 *  Set the speed (motor power) of the lifter motor.  Positive 
+	 * @param speed
+	 */
+	public void setLifterSpeed(double speed)
+	{
+		intakeLifter.setTarget(speed);
+	}
+	
+	public class CmdMoveRollers extends Command 
+	{
+
+		boolean in;
+		
+		public CmdMoveRollers(int msec, boolean in)
+		{
+			super(msec / 1000.0);
+			this.in = in;
+		}
+		
+		protected void initialize()
+	    {
+			setRollerState(in ? RollerState.INTAKE : RollerState.OUTTAKE);
+	    }
+
+	    // Called repeatedly when this Command is scheduled to run
+	    protected void execute()
+	    {
+	    }
+
+	    protected boolean isFinished()
+	    {
+	    	//wait for timeout
+	    	return false;
+	    }
+
+	    protected void end()
+	    {
+	    	setRollerState(RollerState.STOPPED);
+	    }
+
+	    protected void interrupted()
+	    {
+	    	end();
+	    }
+	    
+	}
 }

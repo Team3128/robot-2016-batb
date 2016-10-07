@@ -10,13 +10,16 @@ import org.team3128.common.listener.controltypes.POV;
 import org.team3128.common.util.GenericSendableChooser;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.units.Length;
+import org.team3128.mechanisms.Intake;
 import org.team3128.mechanisms.Turret;
 
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.CANTalon.TalonControlMode;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.command.CommandGroup;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  */
@@ -33,12 +36,17 @@ public class MainBatb extends NarwhalRobot
 	MotorGroup intakeRaise;
 	
 	MotorGroup intakeMotors;
+	MotorGroup turretSpin;
 	
-	ListenerManager lm;
+	Servo hoodServo;
+	
+	ListenerManager lmRight, lmLeft;
 	
 	SRXTankDrive tankDrive;
 	
 	Turret turret;
+	
+	Intake intake;
 	
 	@Override
 	protected void constructHardware()
@@ -55,21 +63,29 @@ public class MainBatb extends NarwhalRobot
 		intakeSpin2 = new VictorSP(1);
 		holderWheel = new MotorGroup(new VictorSP(2));
 		intakeRaise = new MotorGroup(new VictorSP(3));
+		turretSpin = new MotorGroup(new VictorSP(4));
+		
+		hoodServo = new Servo(9);
 		
 		intakeMotors = new MotorGroup(intakeSpin1, intakeSpin2);
 		
-		lm = new ListenerManager(new Joystick(0));//, new Joystick(1));
-		
-		addListenerManager(lm);
+		lmRight = new ListenerManager(new Joystick(1));
+		lmLeft = new ListenerManager(new Joystick(0));
+
+		addListenerManager(lmRight);
+		addListenerManager(lmLeft);
 		
 		tankDrive = new SRXTankDrive(drvLeft1, drvRight1, 6 * Length.in, 1, 20 * Length.in, 15 * Length.in);
 		
-		// configure the other tnk drive talons as followers
+		// configure the other tank drive talons as followers
 		drvLeft2.changeControlMode(TalonControlMode.Follower);
 		drvLeft2.set(drvLeft1.getDeviceID());
 		
 		drvRight2.changeControlMode(TalonControlMode.Follower);
 		drvRight2.set(drvRight1.getDeviceID());
+		
+		intake = new Intake(intakeMotors, holderWheel, intakeRaise);
+		turret = new Turret(launcherWheel, turretSpin, holderWheel, hoodServo, 0);
 		
 		
 	}
@@ -77,18 +93,28 @@ public class MainBatb extends NarwhalRobot
 	@Override
 	protected void setupListeners()
 	{
-		lm.nameControl(ControllerExtreme3D.TWIST, "MoveTurn");
-		lm.nameControl(ControllerExtreme3D.JOYY, "MoveForwards");
-		lm.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");
+		lmRight.nameControl(ControllerExtreme3D.TWIST, "MoveTurn");
+		lmRight.nameControl(ControllerExtreme3D.JOYY, "MoveForwards");
+		lmRight.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");
 		
-		lm.nameControl(new POV(0),"IntakeControl");
-		lm.nameControl(ControllerExtreme3D.TRIGGER, "Launch");
+		lmRight.nameControl(new POV(0),"IntakePOV");
+		lmRight.nameControl(ControllerExtreme3D.TRIGGER, "FullSpeed");
 		
+		lmLeft.nameControl(ControllerExtreme3D.TWIST, "SpinTurret");
+		lmLeft.nameControl(ControllerExtreme3D.JOYY, "MoveHood");
 		
-		lm.addMultiListener(()->
+		lmLeft.nameControl(ControllerExtreme3D.TRIGGER, "Fire");
+		
+		// -----------------------------------------------------------------
+		
+		lmRight.addMultiListener(()->
 		{
-			tankDrive.arcadeDrive(lm.getAxis("MoveTurn"), lm.getAxis("MoveForwards"), lm.getAxis("Throttle"), true);
-		}, "MoveTurn", "MoveForwards", "Throttle");
+			tankDrive.arcadeDrive(lmRight.getAxis("MoveTurn"), lmRight.getAxis("MoveForwards"), lmRight.getAxis("Throttle"), lmRight.getButton("FullSpeed"));
+		}, "MoveTurn", "MoveForwards", "Throttle", "FullSpeed");
+		
+		lmRight.addListener("IntakePOV", intake::onPOVUpdate);
+		
+		lmLeft.addButtonDownListener("Fire", () -> turret.launch());
 		
 	}
 
@@ -119,31 +145,12 @@ public class MainBatb extends NarwhalRobot
 	@Override
 	protected void updateDashboard()
 	{
-		
+		SmartDashboard.putString("Turret State", turret.getState().toString());
 	}
 	
 	@Override
 	protected void teleopPeriodic()
 	{
-		if(lm.getButton("Launch"))
-		{
-			if(turret.getState() == READY_TO_LAUNCH)
-			{
-				turret.launchBall();
-			}
-			else if(turret.getState() == STOPPED)
-			{
-				turret.spinUpLauncher();
-			}
-			else //SPINNING_UP
-			{
-				//do nothing
-			}
-		}
-		else if(turret.getState() != STOPPED)
-		{
-			turret.stopLauncher();
-		}
 	}
 
 }

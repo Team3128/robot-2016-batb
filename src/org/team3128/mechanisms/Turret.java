@@ -133,7 +133,14 @@ public class Turret
 		}
 	}
 	
-	
+	/**
+	 *  Get the state of the turret
+	 * @return
+	 */
+	public TurretState getState()
+	{
+		return state;
+	}
 	
 	
 }

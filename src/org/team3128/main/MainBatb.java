@@ -126,12 +126,14 @@ public class MainBatb extends NarwhalRobot
 		
 		lmLeft.addListener("SpinTurret", turret::spinTurret);
 		
-		
 	}
 
 	@Override
 	protected void disabledInit()
 	{
+		Log.info("BatB", "Servo angle: " + hoodServo.getAngle());
+		hoodServo.setAngle(45.0);
+		Log.info("BatB", "Servo angle: " + hoodServo.getAngle());
 
 	}
 
@@ -144,7 +146,7 @@ public class MainBatb extends NarwhalRobot
 	@Override
 	protected void teleopInit()
 	{	
-		
+
 	}
 	
 	@Override
@@ -163,7 +165,6 @@ public class MainBatb extends NarwhalRobot
 	protected void teleopPeriodic()
 	{
 		turret.changeHoodPositionBy(leftJoy.getY());
-		Log.info("BatB", "Servo Angle: " + hoodServo.getAngle());
 	}
 
 }

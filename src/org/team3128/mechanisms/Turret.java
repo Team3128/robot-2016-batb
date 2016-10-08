@@ -50,9 +50,7 @@ public class Turret
 	
 	// set by thread to tell program what is going on
 	private TurretState state;
-	
-	private double servoAngle;
-	
+		
 	
 	/**
 	 * 
@@ -67,9 +65,7 @@ public class Turret
 		this.rotator = rotator;
 		this.intakeRollers = ballHolderWheel;
 		this.hood = hood;
-		
-		this.servoAngle = hood.getAngle();
-		
+				
 		launcherWheel.changeControlMode(TalonControlMode.Speed);
 		launcherWheel.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 		launcherWheel.set(0);
@@ -151,8 +147,9 @@ public class Turret
 	
 	public void changeHoodPositionBy(double speed)
 	{
+		double startingHoodAngle = hood.getAngle();
 		double deltaAngle = speed / 5.0;
-		double newHoodAngle = servoAngle + deltaAngle;
+		double newHoodAngle = startingHoodAngle + deltaAngle;
 		if(newHoodAngle > 0 && newHoodAngle < 90)
 		{
 			hood.setAngle(newHoodAngle);
@@ -163,6 +160,10 @@ public class Turret
 		}
 	}
 	
+	/**
+	 * Changes spins the turret
+	 * @param power
+	 */
 	
 	public void spinTurret(double power)
 	{

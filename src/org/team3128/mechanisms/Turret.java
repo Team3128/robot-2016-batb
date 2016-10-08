@@ -61,6 +61,7 @@ public class Turret
 		this.launcherWheel = launcherWheel;
 		this.rotator = rotator;
 		this.ballHolderWheel = ballHolderWheel;
+		this.state = TurretState.STOPPED;
 		
 		launcherWheel.changeControlMode(TalonControlMode.Speed);
 		launcherWheel.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);

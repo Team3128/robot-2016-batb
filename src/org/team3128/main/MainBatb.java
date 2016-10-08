@@ -57,7 +57,7 @@ public class MainBatb extends NarwhalRobot
 		drvLeft2 = new CANTalon(1);
 		drvRight1 = new CANTalon(2);
 		drvRight2 = new CANTalon(3);
-		
+		launcherWheel = new CANTalon(4);
 		
 		intakeSpin1 = new VictorSP(0);
 		intakeSpin2 = new VictorSP(1);
@@ -121,7 +121,8 @@ public class MainBatb extends NarwhalRobot
 	@Override
 	protected void disabledInit()
 	{
-
+		//stop the wheels if they were running
+		tankDrive.tankDrive(0, 0);
 	}
 
 	@Override

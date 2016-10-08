@@ -6,6 +6,7 @@ import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.hardware.motor.MotorGroup;
 import org.team3128.common.listener.ListenerManager;
 import org.team3128.common.listener.controllers.ControllerExtreme3D;
+import org.team3128.common.listener.controltypes.Button;
 import org.team3128.common.listener.controltypes.POV;
 import org.team3128.common.util.GenericSendableChooser;
 import org.team3128.common.util.Log;
@@ -15,18 +16,19 @@ import org.team3128.mechanisms.Turret;
 
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.CANTalon.TalonControlMode;
+import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.command.CommandGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DigitalInput;
 
 /**
  */
 public class MainBatb extends NarwhalRobot
 {
-	CANTalon drvLeft1, drvLeft2;
-	
+	CANTalon drvLeft1, drvLeft2;	
 	CANTalon drvRight1, drvRight2;
 	
 	CANTalon launcherWheel;
@@ -34,10 +36,12 @@ public class MainBatb extends NarwhalRobot
 	VictorSP intakeSpin1, intakeSpin2;
 
 	MotorGroup intakeRaise;
+	DigitalInput intakeLimitSwitch;
 	
 	MotorGroup intakeMotors;
 	
 	MotorGroup turretSpin;
+	Counter turretHallEffectSensor;
 	
 	Servo hoodServo;
 	
@@ -67,6 +71,9 @@ public class MainBatb extends NarwhalRobot
 		
 		intakeRaise = new MotorGroup(new VictorSP(3));
 		turretSpin = new MotorGroup(new VictorSP(4));
+		
+		intakeLimitSwitch = new DigitalInput(0);
+		turretHallEffectSensor = new Counter(1);
 		
 		hoodServo = new Servo(9);
 		
@@ -111,6 +118,9 @@ public class MainBatb extends NarwhalRobot
 		
 		lmLeft.nameControl(ControllerExtreme3D.TRIGGER, "Fire");
 		
+		lmLeft.nameControl(new Button(5), "RaiseIntake");
+		lmLeft.nameControl(new Button(6), "LowerIntake");
+		
 		// ------------------------------------------------------------------
 				
 		lmRight.addMultiListener(()->
@@ -125,6 +135,26 @@ public class MainBatb extends NarwhalRobot
 		lmLeft.addButtonDownListener("Fire", () -> turret.launch());
 		
 		lmLeft.addListener("SpinTurret", turret::spinTurret);
+		
+		lmLeft.addButtonDownListener("RaiseIntake", () ->
+		{
+			
+		});
+		
+		lmLeft.addButtonDownListener("RaiseIntake", () ->
+		{
+			
+		});
+		
+		lmLeft.addButtonDownListener("LowerIntake", () ->
+		{
+			
+		});
+		
+		lmLeft.addButtonDownListener("LowerIntake", () ->
+		{
+			
+		});
 		
 	}
 

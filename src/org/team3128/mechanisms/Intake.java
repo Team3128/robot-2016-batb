@@ -34,12 +34,9 @@ public class Intake
 	
 	private RollerState rollerState;
 
-	private boolean intakeUp;
-
 	/**
 	 * 
-	 * @param outerRoller The rollers that suck in the ball
-	 * @param innerRoller The roller in the middle of the robot that holds the ball
+	 * @param rollers The rollers that suck in and hold the ball
 	 * @param intakeLifter The motor that lifts and lowers the intake
 	 */
 	public Intake(MotorGroup rollers, MotorGroup intakeLifter)
@@ -90,6 +87,12 @@ public class Intake
 	{
 		intakeLifter.setTarget(speed);
 	}
+	
+	
+	public void raiseIntake() {
+		
+	}
+	
 	
 	public class CmdMoveRollers extends Command 
 	{

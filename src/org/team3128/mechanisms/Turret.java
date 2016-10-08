@@ -154,10 +154,6 @@ public class Turret
 		{
 			hood.setAngle(newHoodAngle);
 		}
-		else
-		{
-			Log.info("Turret", "Hood max reached!");
-		}
 	}
 	
 	/**

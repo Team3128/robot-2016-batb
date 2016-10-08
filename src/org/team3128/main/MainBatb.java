@@ -16,7 +16,6 @@ import org.team3128.mechanisms.Turret;
 
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.CANTalon.TalonControlMode;
-import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.VictorSP;
@@ -36,12 +35,12 @@ public class MainBatb extends NarwhalRobot
 	VictorSP intakeSpin1, intakeSpin2;
 
 	MotorGroup intakeRaise;
-	DigitalInput intakeLimitSwitch;
+	DigitalInput intakeDownLimSwitch;
 	
 	MotorGroup intakeMotors;
 	
 	MotorGroup turretSpin;
-	Counter turretHallEffectSensor;
+	DigitalInput turretMaxHallSensor;;
 	
 	Servo hoodServo;
 	
@@ -72,8 +71,8 @@ public class MainBatb extends NarwhalRobot
 		intakeRaise = new MotorGroup(new VictorSP(3));
 		turretSpin = new MotorGroup(new VictorSP(4));
 		
-		intakeLimitSwitch = new DigitalInput(0);
-		turretHallEffectSensor = new Counter(1);
+		intakeDownLimSwitch = new DigitalInput(0);
+		turretMaxHallSensor = new DigitalInput(1);
 		
 		hoodServo = new Servo(9);
 		
@@ -97,8 +96,8 @@ public class MainBatb extends NarwhalRobot
 		drvRight2.changeControlMode(TalonControlMode.Follower);
 		drvRight2.set(drvRight1.getDeviceID());
 		
-		intake = new Intake(intakeMotors, intakeRaise);
-		turret = new Turret(launcherWheel, turretSpin, intakeMotors, hoodServo, 0);
+		intake = new Intake(intakeMotors, intakeRaise, intakeDownLimSwitch);
+		turret = new Turret(launcherWheel, turretSpin, intakeMotors, hoodServo, 0, turretMaxHallSensor);
 		
 		
 	}
@@ -134,26 +133,26 @@ public class MainBatb extends NarwhalRobot
 		
 		lmLeft.addButtonDownListener("Fire", () -> turret.launch());
 		
-		lmLeft.addListener("SpinTurret", turret::spinTurret);
+		lmLeft.addListener("MoveHood", turret::changeHoodPositionBy);
 		
 		lmLeft.addButtonDownListener("RaiseIntake", () ->
 		{
-			
+			intake.setIntake(1.0);
 		});
 		
-		lmLeft.addButtonDownListener("RaiseIntake", () ->
+		lmLeft.addButtonUpListener("RaiseIntake", () ->
 		{
-			
+			intake.setIntake(0.0);
 		});
 		
 		lmLeft.addButtonDownListener("LowerIntake", () ->
 		{
-			
+			intake.setIntake(-1.0);
 		});
 		
 		lmLeft.addButtonDownListener("LowerIntake", () ->
 		{
-			
+			intake.setIntake(0.0);
 		});
 		
 	}
@@ -163,10 +162,6 @@ public class MainBatb extends NarwhalRobot
 	{
 		//stop the wheels if they were running
 		tankDrive.tankDrive(0, 0);
-		
-		Log.info("BatB", "Servo angle: " + hoodServo.getAngle());
-		hoodServo.setAngle(45.0);
-		Log.info("BatB", "Servo angle: " + hoodServo.getAngle());
 	}
 
 	@Override
@@ -178,7 +173,6 @@ public class MainBatb extends NarwhalRobot
 	@Override
 	protected void teleopInit()
 	{	
-
 	}
 	
 	@Override
@@ -197,6 +191,7 @@ public class MainBatb extends NarwhalRobot
 	protected void teleopPeriodic()
 	{
 		turret.changeHoodPositionBy(leftJoy.getY());
+		turret.spinTurret(leftJoy.getZ());
 	}
 
 }

@@ -3,6 +3,7 @@ package org.team3128.mechanisms;
 import org.team3128.common.hardware.motor.MotorGroup;
 import org.team3128.common.listener.POVValue;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.command.Command;
 
 /**
@@ -33,16 +34,19 @@ public class Intake
 	private MotorGroup intakeLifter;
 	
 	private RollerState rollerState;
+	
+	private DigitalInput downLimSwitch;
 
 	/**
 	 * 
 	 * @param rollers The rollers that suck in and hold the ball
 	 * @param intakeLifter The motor that lifts and lowers the intake
 	 */
-	public Intake(MotorGroup rollers, MotorGroup intakeLifter)
+	public Intake(MotorGroup rollers, MotorGroup intakeLifter, DigitalInput downLimSwitch)
 	{
 		this.rollers = rollers;
 		this.intakeLifter = intakeLifter;
+		this.downLimSwitch = downLimSwitch;
 	}
 	
 	public void onPOVUpdate(POVValue newValue)
@@ -89,8 +93,13 @@ public class Intake
 	}
 	
 	
-	public void raiseIntake() {
+	public void setIntake(double power) {
+		if (power < 0 && downLimSwitch.get() == true)
+		{
+			power = 0;
+		}
 		
+		setLifterSpeed(power / 5.0);
 	}
 	
 	
@@ -113,6 +122,7 @@ public class Intake
 	    // Called repeatedly when this Command is scheduled to run
 	    protected void execute()
 	    {
+	    	//useless!!!
 	    }
 
 	    protected boolean isFinished()

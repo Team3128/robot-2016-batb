@@ -7,6 +7,7 @@ import org.team3128.common.util.RobotMath;
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.CANTalon.FeedbackDevice;
 import edu.wpi.first.wpilibj.CANTalon.TalonControlMode;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Servo;
 
 public class Turret
@@ -30,11 +31,32 @@ public class Turret
 			return name;
 		}
 	}
+	
+	//describes which direction the turret is turning
+	public enum TurretTurn
+	{
+		CLOCKWISE("cw"),
+		COUNTERCLOCKWISE("ccw"),
+		NONE("n");
+		
+		String direction;
+		
+		private TurretTurn(String direction)
+		{
+			this.direction = direction;
+		}
+		
+		public String toString()
+		{
+			return direction;
+		}
+	}
 
 	CANTalon launcherWheel;
 	MotorGroup rotator;
 	MotorGroup intakeRollers;
 	Servo hood;
+	DigitalInput turnLimitHall;
 		
 	final static double LAUNCH_WHEEL_SPEED = 100; // RPM
 	final static double ALLOWABLE_WHEEL_SPEED_ERROR = LAUNCH_WHEEL_SPEED * .05;
@@ -50,7 +72,7 @@ public class Turret
 	
 	// set by thread to tell program what is going on
 	private TurretState state;
-		
+	private TurretTurn turnDirection;
 	
 	/**
 	 * 
@@ -59,12 +81,13 @@ public class Turret
 	 * @param ballHolderWheel
 	 * @param hood Servo that controls the angle of the hood
 	 */
-	public Turret(CANTalon launcherWheel, MotorGroup rotator, MotorGroup ballHolderWheel, Servo hood, double servoOffset)
+	public Turret(CANTalon launcherWheel, MotorGroup rotator, MotorGroup ballHolderWheel, Servo hood, double servoOffset, DigitalInput turnLimitHall)
 	{
 		this.launcherWheel = launcherWheel;
 		this.rotator = rotator;
 		this.intakeRollers = ballHolderWheel;
 		this.hood = hood;
+		this.turnLimitHall = turnLimitHall;
 				
 		launcherWheel.changeControlMode(TalonControlMode.Speed);
 		launcherWheel.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
@@ -75,6 +98,7 @@ public class Turret
 		thread.start();
 		
 		this.state = TurretState.STOPPED;
+		this.turnDirection = TurretTurn.NONE;
 		
 	}
 	
@@ -163,7 +187,29 @@ public class Turret
 	
 	public void spinTurret(double power)
 	{
-		rotator.setTarget(power / 5.0);
+		double powerToSet = power / 5.0;
+		if (turnLimitHall.get() == true)
+		{
+			if ((power > 0 && turnDirection == TurretTurn.CLOCKWISE) || (power < 0 && turnDirection == TurretTurn.COUNTERCLOCKWISE)) 
+			{
+				powerToSet = 0;
+			}
+		}
+		
+		if (power > 0)
+		{
+			turnDirection = TurretTurn.CLOCKWISE;
+		}
+		else if (power < 0)
+		{
+			turnDirection = TurretTurn.COUNTERCLOCKWISE;
+		}
+		else
+		{
+			turnDirection = TurretTurn.NONE;
+		}
+		
+		rotator.setTarget(powerToSet);
 	}
 	
 	/**

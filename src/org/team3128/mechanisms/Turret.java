@@ -33,12 +33,14 @@ public class Turret
 
 	CANTalon launcherWheel;
 	MotorGroup rotator;
-	MotorGroup ballHolderWheel;
+	MotorGroup intakeRollers;
+	Servo hood;
 		
 	final static double LAUNCH_WHEEL_SPEED = 100; // RPM
 	final static double ALLOWABLE_WHEEL_SPEED_ERROR = LAUNCH_WHEEL_SPEED * .05;
 	final static double BALL_HOLDER_LAUNCH_SPEED = .5; //speed to run the middle roller at to release the ball
 	final static long LAUNCH_TIME = 1000; //ms - time it takes once we start running the middle roller for the ball to be launched
+	
 	
 	private Thread thread;
 	
@@ -48,6 +50,7 @@ public class Turret
 	
 	// set by thread to tell program what is going on
 	private TurretState state;
+		
 	
 	/**
 	 * 
@@ -60,9 +63,9 @@ public class Turret
 	{
 		this.launcherWheel = launcherWheel;
 		this.rotator = rotator;
-		this.ballHolderWheel = ballHolderWheel;
-		this.state = TurretState.STOPPED;
-		
+		this.intakeRollers = ballHolderWheel;
+		this.hood = hood;
+				
 		launcherWheel.changeControlMode(TalonControlMode.Speed);
 		launcherWheel.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 		launcherWheel.set(0);
@@ -70,6 +73,8 @@ public class Turret
 		
 		thread = new Thread(this::turretThread);
 		thread.start();
+		
+		this.state = TurretState.STOPPED;
 		
 	}
 	
@@ -96,7 +101,7 @@ public class Turret
 				if((RobotMath.abs(launcherWheel.getClosedLoopError()) < ALLOWABLE_WHEEL_SPEED_ERROR))
 				{
 					state = TurretState.LAUNCHING;
-					ballHolderWheel.setTarget(BALL_HOLDER_LAUNCH_SPEED);
+					intakeRollers.setTarget(BALL_HOLDER_LAUNCH_SPEED);
 					
 					try
 					{
@@ -108,11 +113,13 @@ public class Turret
 					}
 					
 					state = TurretState.STOPPED;
-					ballHolderWheel.setTarget(0);
+					intakeRollers.setTarget(0);
 					
 				}
 
 			}
+			
+			
 		}
 	}
 	
@@ -132,6 +139,35 @@ public class Turret
 		{
 			setLaunchFlag(true);
 		}
+	}
+	
+	/**
+	 * Set the position of the turret's hood
+	 */
+	
+	public void changeHoodPositionBy(double speed)
+	{
+		double startingHoodAngle = hood.getAngle();
+		double deltaAngle = speed / 5.0;
+		double newHoodAngle = startingHoodAngle + deltaAngle;
+		if(newHoodAngle > 0 && newHoodAngle < 90)
+		{
+			hood.setAngle(newHoodAngle);
+		}
+		else
+		{
+			Log.info("Turret", "Hood max reached!");
+		}
+	}
+	
+	/**
+	 * Changes spins the turret
+	 * @param power
+	 */
+	
+	public void spinTurret(double power)
+	{
+		rotator.setTarget(power / 5.0);
 	}
 	
 	/**

@@ -14,24 +14,21 @@ public class Intake
 {
 	public enum RollerState
 	{
-		STOPPED(0, 0),
-		INTAKE(.25, 1),
-		OUTTAKE(-.7, -1);
+		STOPPED(0),
+		INTAKE(1),
+		OUTTAKE(-1);
 		
-		public final double innerRollerPower;
-		public final double outerRollerPower;
+		public final double rollerPower;
 		
-		private RollerState(double innerPower, double outerPower)
+		private RollerState(double rollerPower)
 		{
-			this.innerRollerPower = innerPower;
-			this.outerRollerPower = outerPower;
+			this.rollerPower = rollerPower;
 		}
 		
 
 	}
 	
-	private MotorGroup outerRoller;
-	private MotorGroup innerRoller;
+	private MotorGroup rollers;
 	
 	private MotorGroup intakeLifter;
 	
@@ -45,10 +42,9 @@ public class Intake
 	 * @param innerRoller The roller in the middle of the robot that holds the ball
 	 * @param intakeLifter The motor that lifts and lowers the intake
 	 */
-	public Intake(MotorGroup outerRoller, MotorGroup innerRoller, MotorGroup intakeLifter)
+	public Intake(MotorGroup rollers, MotorGroup intakeLifter)
 	{
-		this.outerRoller = outerRoller;
-		this.innerRoller = innerRoller;
+		this.rollers = rollers;
 		this.intakeLifter = intakeLifter;
 	}
 	
@@ -81,8 +77,7 @@ public class Intake
 
 	public void setRollerState(RollerState state)
 	{
-		outerRoller.setTarget(state.outerRollerPower);
-		innerRoller.setTarget(state.innerRollerPower);
+		rollers.setTarget(state.rollerPower);
 		
 		rollerState = state;
 	}

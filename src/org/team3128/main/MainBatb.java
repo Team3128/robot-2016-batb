@@ -32,14 +32,16 @@ public class MainBatb extends NarwhalRobot
 	CANTalon launcherWheel;
 
 	VictorSP intakeSpin1, intakeSpin2;
-	MotorGroup holderWheel;
+
 	MotorGroup intakeRaise;
 	
 	MotorGroup intakeMotors;
+	
 	MotorGroup turretSpin;
 	
 	Servo hoodServo;
 	
+	Joystick leftJoy, rightJoy;
 	ListenerManager lmRight, lmLeft;
 	
 	SRXTankDrive tankDrive;
@@ -58,10 +60,11 @@ public class MainBatb extends NarwhalRobot
 		drvRight1 = new CANTalon(2);
 		drvRight2 = new CANTalon(3);
 		
+		launcherWheel = new CANTalon(4);
 		
 		intakeSpin1 = new VictorSP(0);
 		intakeSpin2 = new VictorSP(1);
-		holderWheel = new MotorGroup(new VictorSP(2));
+		
 		intakeRaise = new MotorGroup(new VictorSP(3));
 		turretSpin = new MotorGroup(new VictorSP(4));
 		
@@ -69,8 +72,11 @@ public class MainBatb extends NarwhalRobot
 		
 		intakeMotors = new MotorGroup(intakeSpin1, intakeSpin2);
 		
-		lmRight = new ListenerManager(new Joystick(1));
-		lmLeft = new ListenerManager(new Joystick(0));
+		leftJoy = new Joystick(0);
+		rightJoy = new Joystick(1);
+		
+		lmRight = new ListenerManager(rightJoy);
+		lmLeft = new ListenerManager(leftJoy);
 
 		addListenerManager(lmRight);
 		addListenerManager(lmLeft);
@@ -84,8 +90,8 @@ public class MainBatb extends NarwhalRobot
 		drvRight2.changeControlMode(TalonControlMode.Follower);
 		drvRight2.set(drvRight1.getDeviceID());
 		
-		intake = new Intake(intakeMotors, holderWheel, intakeRaise);
-		turret = new Turret(launcherWheel, turretSpin, holderWheel, hoodServo, 0);
+		intake = new Intake(intakeMotors, intakeRaise);
+		turret = new Turret(launcherWheel, turretSpin, intakeMotors, hoodServo, 0);
 		
 		
 	}
@@ -105,8 +111,8 @@ public class MainBatb extends NarwhalRobot
 		
 		lmLeft.nameControl(ControllerExtreme3D.TRIGGER, "Fire");
 		
-		// -----------------------------------------------------------------
-		
+		// ------------------------------------------------------------------
+				
 		lmRight.addMultiListener(()->
 		{
 			tankDrive.arcadeDrive(lmRight.getAxis("MoveTurn"), lmRight.getAxis("MoveForwards"), lmRight.getAxis("Throttle"), lmRight.getButton("FullSpeed"));
@@ -114,7 +120,12 @@ public class MainBatb extends NarwhalRobot
 		
 		lmRight.addListener("IntakePOV", intake::onPOVUpdate);
 		
+		// ------------------------------------------------------------------
+		
 		lmLeft.addButtonDownListener("Fire", () -> turret.launch());
+		
+		lmLeft.addListener("SpinTurret", turret::spinTurret);
+		
 		
 	}
 
@@ -151,6 +162,8 @@ public class MainBatb extends NarwhalRobot
 	@Override
 	protected void teleopPeriodic()
 	{
+		turret.changeHoodPositionBy(leftJoy.getY());
+		Log.info("BatB", "Servo Angle: " + hoodServo.getAngle());
 	}
 
 }

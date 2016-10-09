@@ -1,6 +1,13 @@
 package org.team3128.main;
 
 
+import org.team3128.autonomous.defensecrossers.CmdGoAcrossLowBar;
+import org.team3128.autonomous.defensecrossers.CmdGoAcrossMoat;
+import org.team3128.autonomous.defensecrossers.CmdGoAcrossPortcullis;
+import org.team3128.autonomous.defensecrossers.CmdGoAcrossRamparts;
+import org.team3128.autonomous.defensecrossers.CmdGoAcrossRockWall;
+import org.team3128.autonomous.defensecrossers.CmdGoAcrossRoughTerrain;
+import org.team3128.autonomous.defensecrossers.CmdGoAcrossShovelFries;
 import org.team3128.common.NarwhalRobot;
 import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.hardware.motor.MotorGroup;
@@ -30,14 +37,13 @@ public class MainBatb extends NarwhalRobot
 	CANTalon drvLeft1, drvLeft2;	
 	CANTalon drvRight1, drvRight2;
 	
-	CANTalon launcherWheel;
-
 	VictorSP intakeSpin1, intakeSpin2;
-
+	MotorGroup intakeMotors;
+	
 	MotorGroup intakeRaise;
 	DigitalInput intakeDownLimSwitch;
 	
-	MotorGroup intakeMotors;
+	CANTalon launcherWheel;
 	
 	MotorGroup turretSpin;
 	DigitalInput turretMaxHallSensor;;
@@ -52,7 +58,7 @@ public class MainBatb extends NarwhalRobot
 	Turret turret;
 	
 	Intake intake;
-	
+			
 	@Override
 	protected void constructHardware()
 	{	
@@ -98,8 +104,8 @@ public class MainBatb extends NarwhalRobot
 		
 		intake = new Intake(intakeMotors, intakeRaise, intakeDownLimSwitch);
 		turret = new Turret(launcherWheel, turretSpin, intakeMotors, hoodServo, 0, turretMaxHallSensor);
-		
-		
+				
+		Log.info("MainBatb", "Hardware Construction for 2016 Battle at the Border robot finished");
 	}
 	
 	@Override
@@ -167,7 +173,7 @@ public class MainBatb extends NarwhalRobot
 	@Override
 	protected void autonomousInit()
 	{
-		
+
 	}
 	
 	@Override
@@ -178,13 +184,22 @@ public class MainBatb extends NarwhalRobot
 	@Override
 	protected void constructAutoPrograms(GenericSendableChooser<CommandGroup> autoChooser)
 	{
-		
+		autoChooser.addDefault("Low Bar", new CmdGoAcrossLowBar(this));
+		autoChooser.addObject("Portcullis", new CmdGoAcrossPortcullis(this));
+		autoChooser.addObject("Shovel Fries", new CmdGoAcrossShovelFries(this));
+		autoChooser.addObject("Moat", new CmdGoAcrossMoat(this));
+		autoChooser.addObject("Rock Wall", new CmdGoAcrossRockWall(this));
+		autoChooser.addObject("Rough Terrain", new CmdGoAcrossRoughTerrain(this));
+		autoChooser.addObject("Ramparts", new CmdGoAcrossRamparts(this));
+		autoChooser.addObject("No Crossing", null);
 	}
 
 	@Override
 	protected void updateDashboard()
 	{
 		SmartDashboard.putString("Turret State", turret.getState().toString());
+		SmartDashboard.putNumber("Hood Angle", turret.getHoodAngle());
+		SmartDashboard.putString("Turret Turning Direction", turret.getTurnDirection().toString());
 	}
 	
 	@Override

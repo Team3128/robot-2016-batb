@@ -35,9 +35,9 @@ public class Turret
 	//describes which direction the turret is turning
 	public enum TurretTurn
 	{
-		CLOCKWISE("cw"),
-		COUNTERCLOCKWISE("ccw"),
-		NONE("n");
+		CLOCKWISE("Clockwise"),
+		COUNTERCLOCKWISE("Counterclockwise"),
+		NONE("None");
 		
 		String direction;
 		
@@ -180,6 +180,10 @@ public class Turret
 		}
 	}
 	
+	public double getHoodAngle() {
+		return hood.getAngle();
+	}
+	
 	/**
 	 * Changes spins the turret
 	 * @param power
@@ -210,6 +214,11 @@ public class Turret
 		}
 		
 		rotator.setTarget(powerToSet);
+	}
+	
+	public TurretTurn getTurnDirection()
+	{
+		return turnDirection;
 	}
 	
 	/**

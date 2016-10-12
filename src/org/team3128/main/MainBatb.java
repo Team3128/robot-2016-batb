@@ -22,8 +22,10 @@ import org.team3128.mechanisms.Intake;
 import org.team3128.mechanisms.Turret;
 
 import edu.wpi.first.wpilibj.CANTalon;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.CANTalon.TalonControlMode;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.command.CommandGroup;
@@ -34,8 +36,16 @@ import edu.wpi.first.wpilibj.DigitalInput;
  */
 public class MainBatb extends NarwhalRobot
 {
+	// Drivetrain
+	SRXTankDrive tankDrive;
+	
 	CANTalon drvLeft1, drvLeft2;	
 	CANTalon drvRight1, drvRight2;
+	
+	PowerDistributionPanel powerDistPanel;
+	
+	// Intake
+	Intake intake;
 	
 	VictorSP intakeSpin1, intakeSpin2;
 	MotorGroup intakeMotors;
@@ -43,22 +53,19 @@ public class MainBatb extends NarwhalRobot
 	MotorGroup intakeRaise;
 	DigitalInput intakeDownLimSwitch;
 	
-	CANTalon launcherWheel;
-	
-	MotorGroup turretSpin;
-	DigitalInput turretMaxHallSensor;;
-	
-	Servo hoodServo;
-	
-	Joystick leftJoy, rightJoy;
-	ListenerManager lmRight, lmLeft;
-	
-	SRXTankDrive tankDrive;
-	
+	// Turret
 	Turret turret;
 	
-	Intake intake;
-			
+	MotorGroup turretSpin;
+	DigitalInput turretMaxHallSensor;
+	
+	CANTalon launcherWheel;
+	Servo hoodServo;
+	
+	// Input Devices
+	Joystick leftJoy, rightJoy;
+	ListenerManager lmRight, lmLeft;
+		
 	@Override
 	protected void constructHardware()
 	{	
@@ -104,7 +111,13 @@ public class MainBatb extends NarwhalRobot
 		
 		intake = new Intake(intakeMotors, intakeRaise, intakeDownLimSwitch);
 		turret = new Turret(launcherWheel, turretSpin, intakeMotors, hoodServo, 0, turretMaxHallSensor);
+		
+		powerDistPanel = new PowerDistributionPanel();
 				
+		CameraServer camera = CameraServer.getInstance();
+		camera.setQuality(10);
+		camera.startAutomaticCapture("cam0");
+		
 		Log.info("MainBatb", "Hardware Construction for 2016 Battle at the Border robot finished");
 	}
 	
@@ -179,18 +192,24 @@ public class MainBatb extends NarwhalRobot
 	@Override
 	protected void teleopInit()
 	{	
+		CameraServer teleopCamera = CameraServer.getInstance();
+		teleopCamera.setQuality(10);
+		if (!teleopCamera.isAutoCaptureStarted()) {
+			teleopCamera.startAutomaticCapture("cam0");
+			Log.debug("MainBatb", "Teleop: Restarted Camera Server");
+		}
 	}
 	
 	@Override
 	protected void constructAutoPrograms(GenericSendableChooser<CommandGroup> autoChooser)
 	{
 		autoChooser.addDefault("Low Bar", new CmdGoAcrossLowBar(this));
-		autoChooser.addObject("Portcullis", new CmdGoAcrossPortcullis(this));
-		autoChooser.addObject("Shovel Fries", new CmdGoAcrossShovelFries(this));
-		autoChooser.addObject("Moat", new CmdGoAcrossMoat(this));
-		autoChooser.addObject("Rock Wall", new CmdGoAcrossRockWall(this));
+		// autoChooser.addObject("Portcullis", new CmdGoAcrossPortcullis(this));
+		// autoChooser.addObject("Shovel Fries", new CmdGoAcrossShovelFries(this));
+		// autoChooser.addObject("Moat", new CmdGoAcrossMoat(this));
+		// autoChooser.addObject("Rock Wall", new CmdGoAcrossRockWall(this));
 		autoChooser.addObject("Rough Terrain", new CmdGoAcrossRoughTerrain(this));
-		autoChooser.addObject("Ramparts", new CmdGoAcrossRamparts(this));
+		// autoChooser.addObject("Ramparts", new CmdGoAcrossRamparts(this));
 		autoChooser.addObject("No Crossing", null);
 	}
 
@@ -200,6 +219,7 @@ public class MainBatb extends NarwhalRobot
 		SmartDashboard.putString("Turret State", turret.getState().toString());
 		SmartDashboard.putNumber("Hood Angle", turret.getHoodAngle());
 		SmartDashboard.putString("Turret Turning Direction", turret.getTurnDirection().toString());
+		SmartDashboard.putNumber("PDP Current Output", powerDistPanel.getTotalCurrent());
 	}
 	
 	@Override

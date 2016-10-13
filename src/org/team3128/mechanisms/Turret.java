@@ -192,7 +192,7 @@ public class Turret
 	public void spinTurret(double power)
 	{
 		double powerToSet = power / 5.0;
-		if (turnLimitHall.get() == true)
+		if (turnLimitHall.get() == false)
 		{
 			if ((power > 0 && turnDirection == TurretTurn.CLOCKWISE) || (power < 0 && turnDirection == TurretTurn.COUNTERCLOCKWISE)) 
 			{

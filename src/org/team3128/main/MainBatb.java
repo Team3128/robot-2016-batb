@@ -78,10 +78,10 @@ public class MainBatb extends NarwhalRobot
 
 		launcherWheel = new CANTalon(4);
 		
-		intakeSpin1 = new VictorSP(0);
-		intakeSpin2 = new VictorSP(1);
+		intakeSpin1 = new VictorSP(8);
+		intakeSpin2 = new VictorSP(9);
 		
-		intakeRaise = new MotorGroup(new VictorSP(3));
+		intakeRaise = new MotorGroup(new VictorSP(5));
 		turretSpin = new MotorGroup(new VictorSP(4));
 		
 		intakeDownLimSwitch = new DigitalInput(0);
@@ -207,7 +207,7 @@ public class MainBatb extends NarwhalRobot
 		// autoChooser.addObject("Portcullis", new CmdGoAcrossPortcullis(this));
 		// autoChooser.addObject("Shovel Fries", new CmdGoAcrossShovelFries(this));
 		// autoChooser.addObject("Moat", new CmdGoAcrossMoat(this));
-		// autoChooser.addObject("Rock Wall", new CmdGoAcrossRockWall(this));
+		autoChooser.addObject("Rock Wall", new CmdGoAcrossRockWall(this));
 		autoChooser.addObject("Rough Terrain", new CmdGoAcrossRoughTerrain(this));
 		// autoChooser.addObject("Ramparts", new CmdGoAcrossRamparts(this));
 		autoChooser.addObject("No Crossing", null);

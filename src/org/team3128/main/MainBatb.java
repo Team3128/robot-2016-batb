@@ -2,12 +2,8 @@ package org.team3128.main;
 
 
 import org.team3128.autonomous.defensecrossers.CmdGoAcrossLowBar;
-import org.team3128.autonomous.defensecrossers.CmdGoAcrossMoat;
-import org.team3128.autonomous.defensecrossers.CmdGoAcrossPortcullis;
-import org.team3128.autonomous.defensecrossers.CmdGoAcrossRamparts;
 import org.team3128.autonomous.defensecrossers.CmdGoAcrossRockWall;
 import org.team3128.autonomous.defensecrossers.CmdGoAcrossRoughTerrain;
-import org.team3128.autonomous.defensecrossers.CmdGoAcrossShovelFries;
 import org.team3128.common.NarwhalRobot;
 import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.hardware.motor.MotorGroup;
@@ -20,17 +16,18 @@ import org.team3128.common.util.Log;
 import org.team3128.common.util.units.Length;
 import org.team3128.mechanisms.Intake;
 import org.team3128.mechanisms.Turret;
+import org.team3128.narwhalvision.NarwhalVisionReceiver;
 
 import edu.wpi.first.wpilibj.CANTalon;
-import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.CANTalon.TalonControlMode;
+import edu.wpi.first.wpilibj.CameraServer;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.command.CommandGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.DigitalInput;
 
 /**
  */
@@ -65,6 +62,9 @@ public class MainBatb extends NarwhalRobot
 	// Input Devices
 	Joystick leftJoy, rightJoy;
 	ListenerManager lmRight, lmLeft;
+	
+	//vision
+	NarwhalVisionReceiver visionReceiver;
 		
 	@Override
 	protected void constructHardware()
@@ -117,6 +117,8 @@ public class MainBatb extends NarwhalRobot
 		CameraServer camera = CameraServer.getInstance();
 		camera.setQuality(10);
 		camera.startAutomaticCapture("cam0");
+		
+		NarwhalVisionReceiver visionReceiver = new NarwhalVisionReceiver();
 		
 		Log.info("MainBatb", "Hardware Construction for 2016 Battle at the Border robot finished");
 	}
@@ -220,6 +222,16 @@ public class MainBatb extends NarwhalRobot
 		SmartDashboard.putNumber("Hood Angle", turret.getHoodAngle());
 		SmartDashboard.putString("Turret Turning Direction", turret.getTurnDirection().toString());
 		SmartDashboard.putNumber("PDP Current Output", powerDistPanel.getTotalCurrent());
+		
+		if(visionReceiver.getLastPacketReceivedTime() > 0)
+		{
+			SmartDashboard.putString("Vision Status", "Target seen " + ((System.currentTimeMillis() - visionReceiver.getLastPacketReceivedTime()) * 1000)
+					+ " s ago, at " + visionReceiver.getMostRecentTarget().getHorizontalAngle() + " degrees from straight ahead");
+		}
+		else
+		{
+			SmartDashboard.putString("Vision Status", "No Target Seen");
+		}
 	}
 	
 	@Override

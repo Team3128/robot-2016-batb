@@ -18,8 +18,9 @@ import org.team3128.mechanisms.Intake;
 import org.team3128.mechanisms.Turret;
 import org.team3128.narwhalvision.NarwhalVisionReceiver;
 
-import edu.wpi.first.wpilibj.CANTalon;
-import edu.wpi.first.wpilibj.CANTalon.TalonControlMode;
+import com.ctre.CANTalon;
+import com.ctre.CANTalon.TalonControlMode;
+
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
@@ -87,7 +88,7 @@ public class MainBatb extends NarwhalRobot
 		intakeDownLimSwitch = new DigitalInput(0);
 		turretMaxHallSensor = new DigitalInput(1);
 		
-		hoodServo = new Servo(9);
+		hoodServo = new Servo(7);
 		
 		intakeMotors = new MotorGroup(intakeSpin1, intakeSpin2);
 		
@@ -115,10 +116,9 @@ public class MainBatb extends NarwhalRobot
 		powerDistPanel = new PowerDistributionPanel();
 				
 		CameraServer camera = CameraServer.getInstance();
-		camera.setQuality(10);
-		camera.startAutomaticCapture("cam0");
+		camera.startAutomaticCapture(0).setResolution(480, 320);
 		
-		NarwhalVisionReceiver visionReceiver = new NarwhalVisionReceiver();
+		visionReceiver = new NarwhalVisionReceiver();
 		
 		Log.info("MainBatb", "Hardware Construction for 2016 Battle at the Border robot finished");
 	}
@@ -194,12 +194,7 @@ public class MainBatb extends NarwhalRobot
 	@Override
 	protected void teleopInit()
 	{	
-		CameraServer teleopCamera = CameraServer.getInstance();
-		teleopCamera.setQuality(10);
-		if (!teleopCamera.isAutoCaptureStarted()) {
-			teleopCamera.startAutomaticCapture("cam0");
-			Log.debug("MainBatb", "Teleop: Restarted Camera Server");
-		}
+
 	}
 	
 	@Override
@@ -225,7 +220,7 @@ public class MainBatb extends NarwhalRobot
 		
 		if(visionReceiver.getLastPacketReceivedTime() > 0)
 		{
-			SmartDashboard.putString("Vision Status", "Target seen " + ((System.currentTimeMillis() - visionReceiver.getLastPacketReceivedTime()) * 1000)
+			SmartDashboard.putString("Vision Status", "Target seen " + ((System.currentTimeMillis() - visionReceiver.getLastPacketReceivedTime()) / 1000.0)
 					+ " s ago, at " + visionReceiver.getMostRecentTarget().getHorizontalAngle() + " degrees from straight ahead");
 		}
 		else

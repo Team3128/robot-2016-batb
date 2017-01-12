@@ -221,7 +221,7 @@ public class MainBatb extends NarwhalRobot
 		if(visionReceiver.getLastPacketReceivedTime() > 0)
 		{
 			SmartDashboard.putString("Vision Status", "Target seen " + ((System.currentTimeMillis() - visionReceiver.getLastPacketReceivedTime()) / 1000.0)
-					+ " s ago, at " + visionReceiver.getMostRecentTarget().getHorizontalAngle() + " degrees from straight ahead");
+					+ " s ago, at " + visionReceiver.getMostRecentTargets()[0].getHorizontalAngle() + " degrees from straight ahead");
 		}
 		else
 		{
